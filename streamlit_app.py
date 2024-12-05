@@ -18,7 +18,7 @@ def get_llm():
 @st.cache_resource
 def get_pandas_agent(_llm, df):
     """Create and return the pandas dataframe agent"""
-    return create_pandas_dataframe_agent(_llm, df, verbose=True, allow_dangerous_code=True)
+    return create_pandas_dataframe_agent(_llm, df, verbose=True,handle_parsing_errors=True, allow_dangerous_code=True)
 
 def create_visualization(df, column_name, viz_type, title=None):
     """Create different types of visualizations using Matplotlib based on the specified type"""
@@ -318,14 +318,17 @@ def process_question(_pandas_agent, question, df):
                             'type': viz_type,
                             'title': f"{viz_type.capitalize()} of {columns[0]}"
                         }
-                        if viz_type == "pie":
-                        # Use create_visualization for pie chart
-                            create_visualization(df, columns[0], "pie", viz_data['title'])
-                    else:
+                        # Use create_visualization for single column visualizations
                         create_visualization(df, columns[0], viz_type, viz_data['title'])
-                
+                    else:
+                        viz_data = {
+                            'columns': columns,
+                            'type': viz_type,
+                            'title': f"{viz_type.capitalize()} of {columns[0]} vs {columns[1]}"
+                        }
+                        # Use create_multi_column_viz for multiple columns
                         create_multi_column_viz(df, columns, viz_type)
-                    
+    
                     if 'visualization_history' in st.session_state:
                         st.session_state.visualization_history.append(viz_data)
                         # Keep only last 5 visualizations
