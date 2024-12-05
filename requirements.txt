@@ -1,1 +1,8 @@
 streamlit
+pandas
+numpy
+plotly
+python-dotenv
+langchain-openai
+langchain-experimental
+openai
