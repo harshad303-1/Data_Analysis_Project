@@ -224,7 +224,8 @@ def store_visualization(column, viz_type, title, stats=None):
     }
     st.session_state.visualization_history.append(viz_data)
 
-
+@st.cache_data(show_spinner="Processing question...", ttl="10m")
+@st.cache_data(show_spinner="Processing question...", ttl="10m")
 @st.cache_data(show_spinner="Processing question...", ttl="10m")
 def process_question(_pandas_agent, question, df):
     try:
@@ -375,13 +376,12 @@ def process_question(_pandas_agent, question, df):
         
         Current question: {question}
         
-        When analyzing:
-        1. Consider relationships between relevant columns
-        2. If finding specific values, include their related data
-        3. Process complete rows of data when needed
-        4. Include supporting evidence in the response
-        
-        Execute the analysis and return complete results.
+        Instructions:
+        1. Analyze the actual data in the dataframe
+        2. Provide specific values and facts from the data
+        3. If visualization was created, interpret the patterns
+        4. If information isn't available, say so explicitly
+        Keep the response clear and focused.
         """
         
         response = _pandas_agent.run(analysis_prompt if not needs_viz else question)
@@ -568,6 +568,11 @@ if st.session_state.clicked[1]:
             # Display user message
             display_chat_message("user", user_question)
             
+            # Add user message to chat history
+            st.session_state.chat_history.append({
+                "role": "user",
+                "content": user_question
+            })
             
             # Process the question and get response
             with st.chat_message("assistant"):
@@ -583,4 +588,4 @@ if st.session_state.clicked[1]:
                     message_data["visualization"] = viz_data
                 
                 add_to_chat_history(message_data)
-               
+                st.session_state.chat_history.append(message_data)
