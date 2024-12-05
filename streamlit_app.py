@@ -284,7 +284,7 @@ def process_question(_pandas_agent, question, df):
             viz_query = _pandas_agent.run(f"""
             For the question: "{question}"
             1. Identify which columns need to be visualized
-            2. Choose the best visualization type (scatter/bar/line/box)
+            2. Choose the best visualization type (scatter/bar/line/box/pie)
             3. Return ONLY in this format:
             COLUMNS: column1, column2 (if comparing two columns)
             TYPE: <viz_type>
@@ -295,6 +295,7 @@ def process_question(_pandas_agent, question, df):
             - If looking at trends: use line
             - If analyzing distributions with categories: use box
             - If showing value distributions: use histogram
+            - If showing proportions of a whole: use pie  # Add this line
             
             Consider the columns' data types and question context carefully.
             """)
@@ -317,13 +318,12 @@ def process_question(_pandas_agent, question, df):
                             'type': viz_type,
                             'title': f"{viz_type.capitalize()} of {columns[0]}"
                         }
-                        create_visualization(df, columns[0], viz_type, viz_data['title'])
+                        if viz_type == "pie":
+                        # Use create_visualization for pie chart
+                            create_visualization(df, columns[0], "pie", viz_data['title'])
                     else:
-                        viz_data = {
-                            'columns': columns,
-                            'type': viz_type,
-                            'title': f"{viz_type.capitalize()} of {columns[0]} vs {columns[1]}"
-                        }
+                        create_visualization(df, columns[0], viz_type, viz_data['title'])
+                
                         create_multi_column_viz(df, columns, viz_type)
                     
                     if 'visualization_history' in st.session_state:
